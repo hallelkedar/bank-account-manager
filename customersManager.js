@@ -39,7 +39,7 @@ export function createCustomer(fullName, accountType, initialBalance) {
   return null
 }
 
-export function getCustomerArray(customer) {
+export function getCustomerObj(customer) {
     return Object.fromEntries(
     Object.entries(customer).filter(
       ([key, value]) => typeof value !== "function",
