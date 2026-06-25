@@ -1,24 +1,39 @@
 const BankAccounts = []
 
-function addAccount(account) {
+export function addAccount(account) {
     BankAccounts.push(account)
 }
 
-function getAllAccounts() {
+export function getAllAccounts() {
     return Object.entries(BankAccounts)
 }
 
-function getAccount(id) {
+export function getAccount(id) {
     return BankAccounts.find(acc => acc.id === id)
 }
 
-function deleteAccount(id) {
-    const acc = getAccount(id)
-    if (!acc) return false
-    
-    const index = BankAccounts.findIndex(
-        (acc, id) => acc.id
+export function getAccountByName(name) {
+    const accName = name.trim().toLowerCase()
+    return BankAccounts.filter(
+        acc => acc.fullName.trim().toLowerCase() === accName
     )
+}
 
-    BankAccounts.splice(index, 1)
+export function getStatistics() {
+    return {
+        totalCustomers: BankAccounts.length,
+        activeAccounts: BankAccounts.reduce(
+            (total, account) => account.isActive ? total+1 : total, 0
+        ),
+        totalMoney: BankAccounts.reduce(
+            (total, account) => total + account.balance, 0
+        ),
+        getAvargeBalance() {
+            return this.totalMoney / this.activeAccounts
+        },
+        highestBalance: BankAccounts.reduce(
+            (max, account) => account.balance > max ? max = account.balance : max, 0
+        )
+
+        }
     }
