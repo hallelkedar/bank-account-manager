@@ -14,14 +14,14 @@ export function createCustomer(fullName, accountType, initialBalance) {
       balance: initialBalance,
       isActive: true,
       deposit: function (amount) {
-        if (!atmValidation(amount, "deposit")) {
+        if (!atmValidation(this.balance, amount, "deposit")) {
           return false;
         }
         this.balance += amount;
         return true;
       },
       withdraw: function (amount) {
-        if (!atmValidation(amount, "withraw")) {
+        if (!atmValidation(this.balance, amount, "withraw")) {
           return false;
         }
         this.balance -= amount;

@@ -25,11 +25,11 @@ export function accValidation(id) {
     return true
 }
 
-export function atmValidation(amount, atmAction) {
+export function atmValidation(balance, amount, atmAction) {
 
     if (atmAction === 'deposit' && amount <= 0) {
         return false
-    } else if (atmAction === 'withraw' && acc.balance < amount) {
+    } else if (atmAction === 'withraw' && balance < amount) {
         return false
     }
     return true

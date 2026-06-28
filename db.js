@@ -5,11 +5,17 @@ export function addAccount(account) {
   BankAccounts.push(account);
 }
 
+const getCleanAccount = (account) => {
+  if (!account) return false;
+  return Object.fromEntries(
+    Object.entries(account).filter(
+      ([key, value]) => typeof value !== "function",
+    ),
+  );
+};
+
 export function getAllAccounts() {
-  if (!BankAccounts) console.log("WARNING | there is no customers in the bank");
-  return BankAccounts.map((account) => {
-    (account.id, account.accountType, account.balance, account.isActive);
-  });
+  return BankAccounts.map((account) => getCleanAccount(account));
 }
 
 export function getAccount(id) {
@@ -18,9 +24,11 @@ export function getAccount(id) {
 
 export function getAccountByName(name) {
   const accName = name.trim().toLowerCase();
-  return BankAccounts.filter(
-    (acc) => acc.fullName.trim().toLowerCase() === accName,
+  const accounts = BankAccounts.filter(
+    (acc) => acc.fullName.trim().toLowerCase() === accName
   );
+  if (accounts.length === 0) return null;
+  return accounts.map((acc) => getCleanAccount(acc))
 }
 
 export function getStatistics() {
@@ -31,11 +39,11 @@ export function getStatistics() {
       0,
     ),
     totalMoney: BankAccounts.reduce(
-      (total, account) => total + account.balance,
+      (total, account) => total + Number(account.balance),
       0,
     ),
     get averageBalance() {
-      return (this.totalMoney / this.activeAccounts) || 0;
+      return this.totalMoney / this.activeAccounts || 0;
     },
     highestBalance: BankAccounts.reduce(
       (max, account) => (account.balance > max ? (max = account.balance) : max),

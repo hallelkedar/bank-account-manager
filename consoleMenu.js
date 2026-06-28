@@ -1,10 +1,11 @@
-import { input, number, select } from "@inquirer/prompts";
+import { input, number, select, confirm } from "@inquirer/prompts";
 import { addAccount, getAccount, getAccountByName } from "./db.js";
-import { createCustomer, getCustomerArray } from "./customersManager.js";
+import { createCustomer, getCustomerObj } from "./customersManager.js";
 import { getAllAccounts, getStatistics } from "./db.js";
 import { devNull } from "node:os";
 import { info, log } from "node:console";
 import { escape } from "node:querystring";
+import { atmValidation } from "./utils/utils.js";
 
 async function createAccountHandle() {
   const name = await input({
@@ -73,24 +74,34 @@ async function atmHandle() {
 
   if (atmAction === "deposit") {
     const done = account.deposit(
-      getNumberInput("Enter amount you would like to deposit: "),
+      await getNumberInput("Enter amount you would like to deposit: "),
     );
     if (done) {
       console.log("Deposit completed successfully");
     }
     return "Deposit failed.";
   } else if (atmAction === "withdraw") {
-    const done = account.withdraw(
-      getNumberInput("Enter amount you would like to withdraw: "),
-    );
+    const withrawNum = await input({
+      message: 'Enter amount you would like to withraw',
+      validate: (value) => {
+        const num = Number(value);
+        if (value.trim() === "" || Number.isNaN(num) || num < 0) {
+          return "You must type non-negative number, try again.";
+        } else if (!atmValidation(account.balance, num, 'withraw')) {
+          return "Withdraw failed: insufficient balance"
+        }
+        return true;
+    },
+  })
+    const done = account.withdraw(Number(withrawNum))
     if (done) {
-      console.log("Withdraw failed: insufficient balance");
+      console.log("Withdraw completed successfully");
     }
-    console.log("Withdraw completed successfully");
-  } else if (atmAction === "close") {
+
+  } else if (atmAction === "closeAccount") {
     const userConfirm = await confirm({ message: "Are you sure? (Y/N)" });
     if (userConfirm) {
-      msg = account.closeAccount();
+      const msg = account.closeAccount();
       return msg;
     }
   }
@@ -108,7 +119,7 @@ async function getValidId() {
       return true;
     },
   });
-  return accountId;
+  return Number(accountId);
 }
 
 async function getExistsName() {
@@ -135,8 +146,9 @@ async function getNumberInput(msg) {
       return true;
     },
   });
-  return number;
+  return Number(number);
 }
+
 
 async function informationHandle() {
   const infoAction = await select({
@@ -171,12 +183,12 @@ async function informationHandle() {
       case "id":
         const idNumber = await getValidId();
         const accById = getAccount(idNumber);
-        console.table(getCustomerArray(idNumber));
+        console.table(getCustomerObj(accById));
         break;
       case "name":
         const nameAccount = await getExistsName();
         const accByName = getAccountByName(nameAccount);
-        console.table(getCustomerArray(accByName.id));
+        console.table(getCustomerObj(accByName));
         break;
     }
   } else if (infoAction === "showStatistics") {
@@ -195,7 +207,7 @@ async function informationHandle() {
   }
 }
 
-async function generalMenu() {
+export async function generalMenu() {
   console.log("Welcome to Bank Account Manager!");
   let keepRunning = true;
   while (keepRunning) {
@@ -243,5 +255,3 @@ async function generalMenu() {
     console.log("\n---");
   }
 }
-
-generalMenu();
