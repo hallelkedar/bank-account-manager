@@ -1,3 +1,3 @@
-import { generalMenu } from "./consoleMenu";
+import { generalMenu } from "./consoleMenu.js";
 
 generalMenu()
